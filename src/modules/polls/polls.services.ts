@@ -26,7 +26,7 @@ const getPollFromDB = async (pollId: string, shouldIncludeVotes?: boolean) => {
   return result;
 };
 
-const createPollIntoDB = async (data: Omit<IPoll, 'votes'>) => {
+const createPollIntoDB = async (data: Omit<IPoll, 'votes' | 'reactions'>) => {
   const result = await PollModel.create(data);
 
   return result;

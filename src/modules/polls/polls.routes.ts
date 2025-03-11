@@ -3,6 +3,7 @@ import { AnyZodObject } from 'zod';
 import { validateRequest } from '../../middlewares/validateRequest';
 import PollController from './polls.controllers';
 import {
+  addReactionToPollValidation,
   createPollValidationSchema,
   voteToPollValidation,
 } from './polls.validations';
@@ -22,6 +23,12 @@ PollsRoute.post(
   '/vote',
   validateRequest(voteToPollValidation as unknown as AnyZodObject),
   PollController.voteToPoll
+);
+
+PollsRoute.post(
+  '/add-reaction',
+  validateRequest(addReactionToPollValidation as unknown as AnyZodObject),
+  PollController.addReaction
 );
 
 export default PollsRoute;

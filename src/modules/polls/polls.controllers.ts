@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { catchAsync } from '../../utils/catchAsync';
 import { sendResponse } from '../../utils/responseGenerator';
-import { ICreatePoll, IVoteToPoll } from './polls.interfaces';
+import { IAddReaction, ICreatePoll, IVoteToPoll } from './polls.interfaces';
 import PollServices from './polls.services';
 import { generateOptions, getExpiresIn } from './polls.utils';
 
@@ -112,5 +112,61 @@ const voteToPoll = catchAsync(async (req, res) => {
   });
 });
 
-const PollController = { createPoll, getPoll, getAllPolls, voteToPoll };
+const addReaction = catchAsync(async (req, res) => {
+  const data: IAddReaction = req?.body;
+
+  if (!['like', 'trending'].includes(data?.reaction)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid reaction type');
+  }
+
+  const reactionKey = `reaction_${data?.reaction}_${data?.pollId}`;
+
+  // Checking reaction key from cookie
+  if (req?.cookies?.[reactionKey]) {
+    throw new AppError(
+      httpStatus.NOT_ACCEPTABLE,
+      'You have already reacted to this poll.'
+    );
+  }
+
+  const pollData = await PollServices.getPollFromDB(data?.pollId);
+
+  // Checking if the poll exists
+  if (!pollData) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Poll not found');
+  }
+
+  // Checking if the poll has expired
+  if (new Date(pollData?.expiresIn) < new Date()) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Poll has expired');
+  }
+
+  // Updating reactions count
+  pollData.reactions.set(
+    data?.reaction,
+    (pollData.reactions.get(data?.reaction) || 0) + 1
+  );
+  await pollData.save();
+
+  // Set a cookie to prevent multiple reactions (Expires with poll)
+  res.cookie(reactionKey, 'true', {
+    expires: pollData.expiresIn,
+    httpOnly: true,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    data: pollData,
+    success: true,
+    message: `Your ${data.reaction} reaction has been recorded successfully`,
+  });
+});
+
+const PollController = {
+  createPoll,
+  getPoll,
+  getAllPolls,
+  voteToPoll,
+  addReaction,
+};
 export default PollController;

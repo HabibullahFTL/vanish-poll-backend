@@ -22,6 +22,17 @@ const pollSchema = new Schema<IPoll>(
       default: {},
       select: 0,
     },
+    reactions: {
+      type: Map,
+      of: {
+        type: Number,
+        default: 0,
+      },
+      default: new Map([
+        ['like', 0],
+        ['trending', 0],
+      ]),
+    },
     expiresIn: {
       type: Date,
       required: [true, 'Expires in is required'],

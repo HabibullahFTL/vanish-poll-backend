@@ -39,3 +39,10 @@ export const voteToPollValidation = z.object({
     optionId: z.string({ required_error: 'Option ID is required' }),
   }),
 });
+
+export const addReactionToPollValidation = z.object({
+  body: z.object({
+    pollId: z.string({ required_error: 'Poll ID is required' }),
+    reaction: z.enum(['like', 'trending']),
+  }),
+});
