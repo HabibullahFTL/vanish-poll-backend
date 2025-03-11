@@ -2,7 +2,7 @@ import { IPoll } from './polls.interfaces';
 import PollModel from './polls.model';
 
 const getAllPollsFromDB = async () => {
-  const results = await PollModel.find();
+  const results = await PollModel.find({ isPrivate: false });
 
   return results;
 };
