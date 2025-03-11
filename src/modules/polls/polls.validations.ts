@@ -5,7 +5,10 @@ export const createPollValidationSchema = z
     body: z.object({
       type: z.enum(['yes/no', 'multiple-choice']),
       question: z.string({ required_error: 'Question is required' }),
-      options: z.array(z.string({ required_error: 'Option is required' })),
+      options: z
+        .array(z.string({ required_error: 'Option is required' }))
+        .optional()
+        .default([]),
       expiresIn: z.enum(['1h', '12h', '24h']),
       isPrivate: z.boolean().optional().default(false),
       hideResults: z.boolean().optional().default(false),

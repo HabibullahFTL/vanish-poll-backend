@@ -2,7 +2,12 @@ import { IPoll } from './polls.interfaces';
 import PollModel from './polls.model';
 
 const getAllPollsFromDB = async () => {
-  const results = await PollModel.find({ isPrivate: false });
+  const results = await PollModel.find({
+    isPrivate: false,
+    expiresIn: {
+      $gte: new Date(),
+    },
+  }).sort('-createdAt');
 
   return results;
 };
