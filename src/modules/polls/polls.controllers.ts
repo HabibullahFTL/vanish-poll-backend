@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import { config } from '../../config';
 import AppError from '../../errors/AppError';
 import { catchAsync } from '../../utils/catchAsync';
 import { sendResponse } from '../../utils/responseGenerator';
@@ -102,7 +103,11 @@ const voteToPoll = catchAsync(async (req, res) => {
   }
 
   // Set a cookie to prevent multiple votes (Expires with poll)
-  res.cookie(voteKey, 'true', { expires: pollData.expiresIn, httpOnly: true });
+  res.cookie(voteKey, 'true', {
+    expires: pollData.expiresIn,
+    httpOnly: true,
+    secure: config.NODE_ENV === 'production',
+  });
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -150,6 +155,7 @@ const addReaction = catchAsync(async (req, res) => {
 
   // Set a cookie to prevent multiple reactions (Expires with poll)
   res.cookie(reactionKey, 'true', {
+    secure: config.NODE_ENV === 'production',
     expires: pollData.expiresIn,
     httpOnly: true,
   });
